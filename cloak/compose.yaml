@@ -1,0 +1,86 @@
+# service definitions
+services:
+
+  # application container definition
+  cloak_app_server:
+    image: quay.io/keycloak/keycloak
+    container_name: keycloak_server
+    volumes:
+      - key_cloak_data:/key-cloak_data
+      - ./tls/:/tls:ro,Z
+      - ./entrypoint.sh:/entrypoint.sh:ro,Z
+    restart: always
+    ports:
+      - 8443:8443       # https port
+      - 9000:9000       # healthcheck port
+    secrets:
+      - keycloak_db_un
+      - keycloak_db_pwd
+      - keycloak_admin_un
+      - keycloak_admin_pwd
+    environment:
+      KC_HTTP_ENABLED: 'false'
+      KC_HTTPS_CERTIFICATE_FILE: /tls/cloak.brtechlabs.com.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /tls/cloak.brtechlabs.com.key
+      KC_HOSTNAME: https://cloak.brtechlabs.com
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://cloak_db_server:5432/keycloak_db
+    depends_on:
+      cloak_db_server:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: '1.0'
+        reservations:
+          memory: 512m
+          cpus: '0.5'
+    entrypoint: ["/entrypoint.sh"]
+    command: ["start"]
+  
+  # db container definition
+  cloak_db_server:
+    image: postgres:18.3
+    container_name: keycloak_db_server
+    volumes:
+      - key_cloak_db_data:/var/lib/postgresql
+    restart: always
+    secrets:
+      - keycloak_db_un
+      - keycloak_db_pwd
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/keycloak_db_un
+      POSTGRES_PASSWORD_FILE: /run/secrets/keycloak_db_pwd
+      POSTGRES_DB: keycloak_db
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8'
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.5'
+        reservations:
+          memory: 256m
+          cpus: '0.25'
+
+
+# volume definitions
+volumes:
+  key_cloak_data:
+  key_cloak_db_data:
+
+
+# secret definitions
+secrets:
+  keycloak_db_un:
+    external: true
+    name: keycloak_db_un
+  keycloak_db_pwd:
+    external: true
+    name: keycloak_db_pwd
+  keycloak_admin_un:
+    external: true
+    name: keycloak_admin_un
+  keycloak_admin_pwd:
+    external: true
+    name: keycloak_admin_pwd
