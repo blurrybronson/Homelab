@@ -7,5 +7,5 @@
 - create_secrets.sh
     - this file is only used to create the docker secrets in the event that I move this to a new host 
 
-# Files/direcotires in gitignore 
+# Files/directories in gitignore 
 - tls/ 
