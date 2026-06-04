@@ -30,6 +30,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: '1.0'
+        reservations:
+          memory: 512m
+          cpus: '0.5'
     security_opt: [no-new-privileges:true]
     entrypoint: ["/entrypoint.sh"]
 
