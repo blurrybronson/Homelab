@@ -1,0 +1,47 @@
+# service definitions
+services:
+
+  # vault application definition
+  vault:
+    image: hashicorp/vault:1.21.2 
+    container_name: vault_prod
+    restart: unless-stopped
+    user: vault
+    volumes:
+      - data:/vault/data                                    # vault data volume (Docker volume) 
+      - ./config/vault.hcl:/vault/config/vault.hcl:ro       # volume containg the main vault.hcl config file 
+      - ./entrypoint.sh:/entrypoint.sh:ro,Z                 # entrypoint script to set env variables
+      - ./tls:/vault/tls:ro                                 # volume containing tls certificate files
+    ports:
+      - "127.0.0.1:8200:8200"
+    cap_drop:
+      - ALL
+    cap_add:
+      - IPC_LOCK
+    secrets:
+      - AWS_ACCESS_KEY_ID
+      - AWS_ACCESS_KEY
+    environment:
+      - VAULT_ADDR=https://vault.brtechlabs.com:8200
+      - SKIP_SETCAP=true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt: [no-new-privileges:true]
+    entrypoint: ["/entrypoint.sh"]
+
+# volume definitions
+volumes:
+  data:
+
+# secret definitions
+secrets:
+  AWS_ACCESS_KEY_ID:
+    external: true
+    name: AWS_ACCESS_KEY_ID
+  AWS_ACCESS_KEY:
+    external: true
+    name: AWS_ACCESS_KEY
