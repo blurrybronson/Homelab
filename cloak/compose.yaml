@@ -9,7 +9,7 @@ services:
       - key_cloak_data:/key-cloak_data
       - ./tls/:/tls:ro,Z
       - ./entrypoint.sh:/entrypoint.sh:ro,Z
-    restart: always
+    restart: unless-stopped
     ports:
       - 8443:8443       # https port
       - 9000:9000       # healthcheck port
@@ -28,6 +28,11 @@ services:
     depends_on:
       cloak_db_server:
         condition: service_started
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
     deploy:
       resources:
         limits:
@@ -45,7 +50,7 @@ services:
     container_name: keycloak_db_server
     volumes:
       - key_cloak_db_data:/var/lib/postgresql
-    restart: always
+    restart: unless-stopped
     secrets:
       - keycloak_db_un
       - keycloak_db_pwd
@@ -54,6 +59,14 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/keycloak_db_pwd
       POSTGRES_DB: keycloak_db
       POSTGRES_INITDB_ARGS: '--encoding=UTF8'
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+      - FOWNER
+      - CHOWN
     deploy:
       resources:
         limits:
