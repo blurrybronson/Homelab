@@ -1,0 +1,50 @@
+services:
+  # nginx reverse proxy definition 
+  nginx:
+    container_name: nginx
+    image: nginx:1.30.0
+    restart: unless-stopped
+    volumes:
+      - ./conf.d/:/etc/nginx/conf.d:ro,Z
+      - ./tls/:/etc/nginx/certs:ro,Z
+      - nginx_logs:/var/log/nginx:Z
+    ports:
+      - 8080:8080
+      - 8443:8443
+    networks:
+      - backend
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+      - /var/cache/nginx:size=64m
+      - /var/run:size=8m
+      - /run:size=8m
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+          cpus: "0.5"
+        reservations:
+          memory: 32m
+          cpus: "0.25"
+
+# network definitions
+# backend network is used for container to communicate internally
+networks:
+  backend:
+    external: true
+
+# volume definitions
+# data that doesn't need to be edited/modified will be stored in a traditional Podman volume
+# data that might change (configs) will be stored as directories and passed into the container 
+volumes:
+  nginx_logs:
+    name: nginx_logs
