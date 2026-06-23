@@ -1,0 +1,2 @@
+desk:1,2:Primary,2:Audio,Speakers (High Definition Audio Device)
+tv:3:Primary,3:Audio,LG TV SSCR2 (NVIDIA High Definition Audio)
