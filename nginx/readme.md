@@ -1,0 +1,1 @@
+Only internal podman IPs are published in this writeup. These are non-routable outside fo the container host. If someone were to make it into the container host, they can already find all of this information as is. 
