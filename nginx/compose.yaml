@@ -11,8 +11,6 @@ services:
     ports:
       - 8080:8080
       - 8443:8443
-    networks:
-      - backend
     cap_drop:
       - ALL
     cap_add:
@@ -35,11 +33,22 @@ services:
         reservations:
           memory: 32m
           cpus: "0.25"
+    networks:
+      - immich_internal
+      - vault_internal
+      - warden_internal
+      - keycloak_internal
 
 # network definitions
 # backend network is used for container to communicate internally
 networks:
-  backend:
+  immich_internal:
+    external: true
+  vault_internal:
+    external: true
+  warden_internal:
+    external: true
+  keycloak_internal:
     external: true
 
 # volume definitions
