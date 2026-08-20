@@ -27,9 +27,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    read_only: true
-    tmpfs:
-      - /tmp
     deploy:
       resources:
         limits:
@@ -53,3 +50,8 @@ secrets:
   AWS_ACCESS_KEY:
     external: true
     name: AWS_ACCESS_KEY
+
+# network definitions
+networks:
+  vault_internal:
+    external: true
